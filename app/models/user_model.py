@@ -4,8 +4,27 @@ import os
 import secrets
 from datetime import datetime, timedelta
 from bson import ObjectId
-from database import users_collection
+from pymongo import MongoClient
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 
+# 🔹 MongoDB Connection
+client = MongoClient("mongodb://localhost:27017")
+db = client["mydatabase"]
+users_collection = db["users"]
+
+# 🔹 Pydantic Model (Validation Layer)
+class UserSchema(BaseModel):
+    username: str = Field(..., min_length=3, max_length=30)
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+    role: str = "user"
+    is_email_verified: bool = False
+    refresh_token: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+# 🔹 PyMongo Model (Database Layer)
 class User:
     def __init__(self, username, email, password, role="user"):
         self.username = username
@@ -45,7 +64,7 @@ class User:
         return jwt.encode(payload, os.getenv("REFRESH_TOKEN_SECRET"), algorithm="HS256")
 
     def save(self):
-        """Save user to MongoDB"""
+        """Save user to MongoDB after hashing the password"""
         self.hash_password()
         user_dict = self.__dict__
         result = users_collection.insert_one(user_dict)
