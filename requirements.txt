@@ -38,3 +38,12 @@ uvicorn==0.34.0
 uvloop==0.21.0
 watchfiles==1.0.4
 websockets==14.1
+
+# Additional dependencies for the FastAPI implementation
+bcrypt==4.1.2
+passlib[bcrypt]==1.7.4
+python-jose==3.3.0
+motor==3.4.0
+pillow==10.2.0
+python-jose[cryptography]==3.3.0
+
